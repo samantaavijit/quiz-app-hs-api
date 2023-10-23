@@ -6,4 +6,5 @@ module.exports = (app) => {
   });
 
   app.use(Router);
+  app.use("/api/auth", require("../AuthModule/routes/AuthRoutes"));
 };
