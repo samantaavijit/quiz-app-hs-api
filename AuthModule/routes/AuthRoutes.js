@@ -1,12 +1,14 @@
-const { registration, login } = require("../controllers/AuthControllers");
 const {
-  signupValidation,
-  loginValidation,
-} = require("../validation/AuthValidation");
+  login,
+  adminLogin,
+  adminRegistration,
+} = require("../controllers/AuthControllers");
+const { loginValidation } = require("../validation/AuthValidation");
 
 const AuthRouter = require("express").Router();
 
-AuthRouter.post("/register", [signupValidation], registration);
-AuthRouter.post("/login", [loginValidation], login);
+AuthRouter.post("/login", login);
+AuthRouter.post("/admin-signup", [loginValidation], adminRegistration);
+AuthRouter.post("/admin-login", [loginValidation], adminLogin);
 
 module.exports = AuthRouter;
