@@ -3,6 +3,9 @@ const commonMessage = {
   UN_AUTHORIZED: "You are not logged in. Please log in to continue",
   TOKEN_EXPIRED: "Token expired. Please log in to continue",
   COMPLETE_MANDATORY_FIELD: "Please complete all mandatory fields",
+  INVALID_USER: "User is not valid.",
+  EMPTY_FILE: "File Not Found.",
+  SIZE_EXCEEDED: "File size is too large",
 };
 
 const response = async ({ status, statusCode, response, res }) => {
