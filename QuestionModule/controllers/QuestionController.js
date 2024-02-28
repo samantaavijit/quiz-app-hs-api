@@ -114,7 +114,38 @@ const uploadChapterThumbnail = async (req, res) => {
   }
 };
 
+const getAllChapters = async (req, res) => {
+  try {
+    const results = await ChapterModel.find();
+
+    responseData = {
+      success: true,
+      message: "All chapters",
+      chapters: results,
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   uploadChapterThumbnail,
   addChapter,
+  getAllChapters,
 };
