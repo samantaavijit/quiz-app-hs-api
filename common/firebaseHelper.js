@@ -3,10 +3,12 @@ const serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: process.env.RIREBASE_BUCKET_URL,
+  storageBucket: process.env.FIREBASE_BUCKET_URL,
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
 const bucket = admin.storage().bucket();
+const firebaseDatabase = admin.database();
 
 /**
  * Uploads a file to a specified folder in Firebase Storage.
@@ -30,4 +32,5 @@ const uploadToFirebaseBucket = async (file, foldername, fileName) => {
 
 module.exports = {
   uploadToFirebaseBucket,
+  firebaseDatabase,
 };

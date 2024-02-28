@@ -3,8 +3,12 @@ const {
   uploadChapterThumbnail,
   addChapter,
   getAllChapters,
+  addQuestion,
 } = require("../controllers/QuestionController");
-const { addChapterValidation } = require("../validation/QuestionValidation");
+const {
+  addChapterValidation,
+  addQuestionValidation,
+} = require("../validation/QuestionValidation");
 const { isAdmin } = require("../../common/Helper");
 
 const Router = require("express").Router();
@@ -20,5 +24,6 @@ Router.post(
 );
 
 Router.post("/add-chapter", [isAdmin, addChapterValidation], addChapter);
+Router.post("/add-question", [isAdmin, addQuestionValidation], addQuestion);
 
 module.exports = Router;

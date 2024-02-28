@@ -4,7 +4,10 @@ const ChapterModel = require("../models/ChapterModel");
 const { file_size } = require("../../common/fileHelper");
 const path = require("path");
 const moment = require("moment");
-const { uploadToFirebaseBucket } = require("../../common/firebaseHelper");
+const {
+  uploadToFirebaseBucket,
+  firebaseDatabase,
+} = require("../../common/firebaseHelper");
 
 let responseData;
 
@@ -144,8 +147,84 @@ const getAllChapters = async (req, res) => {
   }
 };
 
+const addQuestion = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      responseData = {
+        success: false,
+        message: commonMessage.COMPLETE_MANDATORY_FIELD,
+        errors: errors.array(),
+      };
+      return response({
+        statusCode: 200,
+        status: "failed",
+        response: responseData,
+        res,
+      });
+    }
+
+    let { c_id, question, options, answer, year, hints } = req.body;
+
+    year = year || null;
+    hints = hints || null;
+
+    const data = {
+      question,
+      options,
+      answer,
+      year,
+      hints,
+    };
+
+    const ref = firebaseDatabase.ref(c_id);
+
+    ref
+      .child(new Date().getTime())
+      .set(data)
+      .then(() => {
+        responseData = {
+          success: true,
+          message: "Question Added Successfully",
+        };
+        return response({
+          statusCode: 200,
+          status: "success",
+          response: responseData,
+          res,
+        });
+      })
+      .catch((error) => {
+        responseData = {
+          success: false,
+          message: "Question Added Failed",
+          err: error,
+        };
+        return response({
+          statusCode: 200,
+          status: "failed",
+          response: responseData,
+          res,
+        });
+      });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   uploadChapterThumbnail,
   addChapter,
   getAllChapters,
+  addQuestion,
 };
