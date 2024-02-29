@@ -222,9 +222,74 @@ const addQuestion = async (req, res) => {
   }
 };
 
+const getTopicWiseQuestions = async (req, res) => {
+  try {
+    let { per_page, startAtKey } = req.query;
+    const limit = per_page || 10;
+    const { c_id } = req.params;
+
+    let query = firebaseDatabase.ref(c_id);
+
+    query = query.orderByKey();
+
+    if (startAtKey) {
+      query = query.startAt(startAtKey);
+    }
+
+    query = query.limitToFirst(parseInt(limit));
+
+    const snapshot = await query.once("value");
+
+    const data = snapshot.val();
+
+    if (data) {
+      const keys = Object.keys(data);
+      const lastKey = keys[keys.length - 1];
+      // const lastKey = Object.keys(data).pop();
+      startAtKey = lastKey;
+      responseData = {
+        success: true,
+        message: "All Questions",
+        questions: data,
+        startAtKey,
+      };
+      return response({
+        statusCode: 200,
+        status: "success",
+        response: responseData,
+        res,
+      });
+    }
+
+    responseData = {
+      success: false,
+      message: "Question Not Found",
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   uploadChapterThumbnail,
   addChapter,
   getAllChapters,
   addQuestion,
+  getTopicWiseQuestions,
 };

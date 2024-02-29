@@ -4,6 +4,7 @@ const {
   addChapter,
   getAllChapters,
   addQuestion,
+  getTopicWiseQuestions,
 } = require("../controllers/QuestionController");
 const {
   addChapterValidation,
@@ -25,5 +26,5 @@ Router.post(
 
 Router.post("/add-chapter", [isAdmin, addChapterValidation], addChapter);
 Router.post("/add-question", [isAdmin, addQuestionValidation], addQuestion);
-
+Router.get("/topic-wise-question/:c_id", getTopicWiseQuestions);
 module.exports = Router;
