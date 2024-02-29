@@ -8,6 +8,7 @@ const {
   uploadToFirebaseBucket,
   firebaseDatabase,
 } = require("../../common/firebaseHelper");
+const TotalQuestionModel = require("../models/TotalQuestionModel");
 
 let responseData;
 
@@ -182,7 +183,14 @@ const addQuestion = async (req, res) => {
     ref
       .child(new Date().getTime())
       .set(data)
-      .then(() => {
+      .then(async () => {
+        // INCREMENT BY ONE
+        await TotalQuestionModel.findOneAndUpdate(
+          { c_id },
+          { $inc: { total: 1 } },
+          { upsert: true, new: true }
+        );
+
         responseData = {
           success: true,
           message: "Question Added Successfully",
@@ -286,10 +294,70 @@ const getTopicWiseQuestions = async (req, res) => {
   }
 };
 
+const generateRandomQuestion = async (req, res) => {
+  try {
+    let { topic_id, totalQuestions } = req.query;
+
+    let randomData = [];
+
+    if (topic_id !== "all_chapters") {
+      let query = firebaseDatabase.ref(topic_id);
+
+      const snapshot = await query.once("value");
+
+      let totalItems = await TotalQuestionModel.findOne({ c_id: topic_id });
+
+      totalItems = totalItems ? totalItems.total : 0;
+
+      const data = snapshot.val();
+
+      const keys = Object.keys(data);
+
+      let randomKeys = [];
+      while (randomKeys.length < Math.min(totalQuestions, totalItems)) {
+        const randomIndex = Math.floor(Math.random() * keys.length);
+        const key = keys[randomIndex];
+        if (!randomKeys.includes(key)) {
+          randomKeys.push(key);
+        }
+      }
+
+      randomData = randomKeys.map((key) => data[key]);
+    }
+
+    //TODO: FOR ALL CHAPTERS
+
+    responseData = {
+      success: true,
+      message: "All Questions",
+      questions: randomData,
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   uploadChapterThumbnail,
   addChapter,
   getAllChapters,
   addQuestion,
   getTopicWiseQuestions,
+  generateRandomQuestion,
 };
