@@ -8,4 +8,5 @@ module.exports = (app) => {
   app.use(Router);
   app.use("/api/auth", require("../AuthModule/routes/AuthRoutes"));
   app.use("/api/question", require("../QuestionModule/routes/QuestionRoutes"));
+  app.use("/api/user", require("../UserModule/routes/UserRoutes"));
 };
