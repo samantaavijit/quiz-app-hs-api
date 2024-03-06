@@ -91,7 +91,55 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const toggleUserStatus = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    const updateResult = await UsersModel.updateOne({ _id: id }, [
+      { $set: { active: { $eq: [false, "$active"] } } },
+    ]);
+
+    if (updateResult.modifiedCount === 1) {
+      responseData = {
+        success: true,
+        message: "Active status changes successfully",
+      };
+      return response({
+        statusCode: 200,
+        status: "success",
+        response: responseData,
+        res,
+      });
+    }
+
+    responseData = {
+      success: false,
+      message: "Active status changed failed",
+    };
+
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   getDashboardData,
   getAllUsers,
+  toggleUserStatus,
 };
