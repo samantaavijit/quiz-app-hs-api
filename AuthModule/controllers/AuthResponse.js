@@ -9,6 +9,7 @@ const loginMessage = {
   FAILED: "Login failed",
   NO_USER: "User not found",
   PASSWORD_NOT_MATCH: "Password not match",
+  REVIEW: "Your Account is Under Review",
 };
 
 module.exports = {

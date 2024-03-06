@@ -7,10 +7,21 @@ const UsersSchema = new mongoose.Schema(
       unique: true,
       max: 50,
     },
-    password: {
+    name: {
       type: String,
       required: true,
-      min: 6,
+    },
+    avatar: {
+      type: String,
+      required: true,
+    },
+    mobile: {
+      type: String,
+      default: null,
+    },
+    active: {
+      type: Boolean,
+      default: false,
     },
   },
   {

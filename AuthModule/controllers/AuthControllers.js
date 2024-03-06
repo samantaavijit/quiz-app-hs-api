@@ -104,33 +104,54 @@ const login = async (req, res) => {
       });
     }
 
-    let { email, password } = req.body;
+    let { email, name, avatar } = req.body;
 
-    const user = await UsersModel.findOne({ email });
+    let user = await UsersModel.findOne({ email });
+
+    // CHECK USER EXIST OR NOT IF NOT PRESENT THE CREATE USER
 
     if (!user) {
+      user = await UsersModel.create({
+        email,
+        name,
+        avatar,
+      });
+
+      if (!user) {
+        responseData = {
+          success: false,
+          message: loginMessage.FAILED,
+        };
+        return response({
+          statusCode: 200,
+          status: "failed",
+          response: responseData,
+          res,
+        });
+      }
+
       responseData = {
-        success: false,
-        message: loginMessage.NO_USER,
+        success: true,
+        message: loginMessage.REVIEW,
+        inReview: true,
       };
       return response({
         statusCode: 200,
-        status: "failed",
+        status: "success",
         response: responseData,
         res,
       });
     }
 
-    const passwordCompare = await bcrypt.compare(password, user.password);
-
-    if (!passwordCompare) {
+    if (!user.active) {
       responseData = {
-        success: false,
-        message: loginMessage.PASSWORD_NOT_MATCH,
+        success: true,
+        message: loginMessage.REVIEW,
+        inReview: true,
       };
       return response({
         statusCode: 200,
-        status: "failed",
+        status: "success",
         response: responseData,
         res,
       });
@@ -252,7 +273,7 @@ const adminLogin = async (req, res) => {
 const userObject = (user) => {
   return new Promise((resolve, reject) => {
     let u = { ...user };
-    delete u._doc.password;
+    delete u._doc.active;
     // delete u._doc.activeStatus;
     // delete u._doc.deleted;
     // delete u._doc.activationKey;
