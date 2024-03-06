@@ -11,14 +11,11 @@ const {
   addChapterValidation,
   addQuestionValidation,
 } = require("../validation/QuestionValidation");
-const { isAdmin } = require("../../common/Helper");
+const { isAdmin, isAuthenticate } = require("../../common/Helper");
 
 const Router = require("express").Router();
 
-// FOR ALL USERS
-Router.get("/all-chapters", getAllChapters);
-
-// FOR ADMIN
+// FOR ADMIN ONLY
 Router.post(
   "/upload-thumbnail",
   uploadThumbnail.single("image"),
@@ -27,7 +24,15 @@ Router.post(
 
 Router.post("/add-chapter", [isAdmin, addChapterValidation], addChapter);
 Router.post("/add-question", [isAdmin, addQuestionValidation], addQuestion);
-Router.get("/topic-wise-question/:c_id", getTopicWiseQuestions);
-Router.get("/get-quiz-question", generateRandomQuestion);
+
+// FOR USERS ONLY
+
+Router.get("/all-chapters", [isAuthenticate], getAllChapters);
+Router.get(
+  "/topic-wise-question/:c_id",
+  [isAuthenticate],
+  getTopicWiseQuestions
+);
+Router.get("/get-quiz-question", [isAuthenticate], generateRandomQuestion);
 
 module.exports = Router;
