@@ -145,9 +145,70 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
+const isValidUser = async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+  try {
+    if (!token) {
+      responseData = {
+        success: false,
+        message: commonMessage.UN_AUTHORIZED,
+      };
+      return res.json(responseData);
+    }
+
+    let isVarifiedToken = verifyToken(token);
+
+    if (typeof isVarifiedToken !== "object") {
+      responseData = {
+        success: false,
+        message: isVarifiedToken,
+      };
+      return response({
+        statusCode: 200,
+        status: "failed",
+        response: responseData,
+        res,
+      });
+    }
+
+    let { user_id } = isVarifiedToken;
+
+    let userDetails = await AdminModel.findById(user_id);
+
+    if (!userDetails) {
+      userDetails = await UsersModel.findById(user_id);
+
+      if (!userDetails) {
+        responseData = {
+          success: false,
+          message: commonMessage.INVALID_USER,
+        };
+        return res.json(responseData);
+      }
+    }
+
+    req.userDetails = userDetails;
+    next();
+  } catch (err) {
+    responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      error: err,
+    };
+    res.json(responseData);
+  }
+};
+
 module.exports = {
   createToken,
   verifyToken,
   isAdmin,
   isAuthenticate,
+  isValidUser,
 };
