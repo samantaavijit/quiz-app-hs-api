@@ -4,11 +4,9 @@ const ChapterModel = require("../models/ChapterModel");
 const { file_size } = require("../../common/fileHelper");
 const path = require("path");
 const moment = require("moment");
-const {
-  uploadToFirebaseBucket,
-  firebaseDatabase,
-} = require("../../common/firebaseHelper");
+const { firebaseDatabase } = require("../../common/firebaseHelper");
 const TotalQuestionModel = require("../models/TotalQuestionModel");
+const QuestionModel = require("../models/QuestionModel");
 
 let responseData;
 
@@ -45,64 +43,6 @@ const addChapter = async (req, res) => {
         res,
       });
     }
-  } catch (err) {
-    let responseData = {
-      success: false,
-      message: commonMessage.API_ERROR,
-      err: err.stack,
-    };
-    return response({
-      statusCode: 200,
-      status: "failed",
-      response: responseData,
-      res,
-    });
-  }
-};
-
-const uploadChapterThumbnail = async (req, res) => {
-  try {
-    let { file } = req;
-
-    if (!file) {
-      responseData = {
-        success: false,
-        message: commonMessage.EMPTY_FILE,
-      };
-      return response({
-        statusCode: 200,
-        status: "failed",
-        response: responseData,
-        res,
-      });
-    }
-
-    if (file.size > file_size.THUMBNAIL) {
-      responseData = {
-        success: false,
-        message: commonMessage.SIZE_EXCEEDED,
-      };
-      return response({
-        statusCode: 200,
-        status: "failed",
-        response: responseData,
-        res,
-      });
-    }
-
-    let ext = path.extname(file.originalname);
-
-    let image_name = `job_${moment().unix()}${Math.floor(
-      Math.random() * 100
-    )}${ext}`;
-
-    let cover_image = await uploadToFirebaseBucket(
-      file,
-      "computer",
-      image_name
-    );
-
-    console.log(cover_image);
   } catch (err) {
     let responseData = {
       success: false,
@@ -171,6 +111,7 @@ const addQuestion = async (req, res) => {
     hints = hints || null;
 
     const data = {
+      c_id,
       question,
       options,
       answer,
@@ -178,43 +119,30 @@ const addQuestion = async (req, res) => {
       hints,
     };
 
-    const ref = firebaseDatabase.ref(c_id);
+    const result = await QuestionModel.create(data);
 
-    ref
-      .child(new Date().getTime())
-      .set(data)
-      .then(async () => {
-        // INCREMENT BY ONE
-        await TotalQuestionModel.findOneAndUpdate(
-          { c_id },
-          { $inc: { total: 1 } },
-          { upsert: true, new: true }
-        );
-
-        responseData = {
-          success: true,
-          message: "Question Added Successfully",
-        };
-        return response({
-          statusCode: 200,
-          status: "success",
-          response: responseData,
-          res,
-        });
-      })
-      .catch((error) => {
-        responseData = {
-          success: false,
-          message: "Question Added Failed",
-          err: error,
-        };
-        return response({
-          statusCode: 200,
-          status: "failed",
-          response: responseData,
-          res,
-        });
+    if (result) {
+      responseData = {
+        success: true,
+        message: "Question Added Successfully",
+      };
+      return response({
+        statusCode: 200,
+        status: "success",
+        response: responseData,
+        res,
       });
+    }
+    responseData = {
+      success: false,
+      message: "Question Added Failed",
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
   } catch (err) {
     let responseData = {
       success: false,
@@ -232,50 +160,24 @@ const addQuestion = async (req, res) => {
 
 const getTopicWiseQuestions = async (req, res) => {
   try {
-    let { per_page, startAtKey } = req.query;
+    let { per_page, page } = req.query;
     const limit = per_page || 10;
+    page = page || 1;
+    const skip = limit * (page - 1);
     const { c_id } = req.params;
 
-    let query = firebaseDatabase.ref(c_id);
-
-    query = query.orderByKey();
-
-    if (startAtKey) {
-      query = query.startAt(startAtKey);
-    }
-
-    query = query.limitToFirst(parseInt(limit));
-
-    const snapshot = await query.once("value");
-
-    const data = snapshot.val();
-
-    if (data) {
-      const keys = Object.keys(data);
-      const lastKey = keys[keys.length - 1];
-      // const lastKey = Object.keys(data).pop();
-      startAtKey = lastKey;
-      responseData = {
-        success: true,
-        message: "All Questions",
-        questions: data,
-        startAtKey,
-      };
-      return response({
-        statusCode: 200,
-        status: "success",
-        response: responseData,
-        res,
-      });
-    }
+    const total = await QuestionModel.countDocuments({ c_id });
+    const result = await QuestionModel.find({ c_id }).skip(skip).limit(limit);
 
     responseData = {
-      success: false,
-      message: "Question Not Found",
+      success: true,
+      message: "All Questions",
+      questions: result,
+      total,
     };
     return response({
       statusCode: 200,
-      status: "failed",
+      status: "success",
       response: responseData,
       res,
     });
@@ -297,6 +199,18 @@ const getTopicWiseQuestions = async (req, res) => {
 const generateRandomQuestion = async (req, res) => {
   try {
     let { topic_id, totalQuestions } = req.query;
+
+    responseData = {
+      success: true,
+      message: "All Questions",
+      questions: [],
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
 
     let randomData = [];
 
@@ -330,7 +244,7 @@ const generateRandomQuestion = async (req, res) => {
     responseData = {
       success: true,
       message: "All Questions",
-      questions: randomData,
+      questions: [],
     };
     return response({
       statusCode: 200,
@@ -354,7 +268,6 @@ const generateRandomQuestion = async (req, res) => {
 };
 
 module.exports = {
-  uploadChapterThumbnail,
   addChapter,
   getAllChapters,
   addQuestion,
