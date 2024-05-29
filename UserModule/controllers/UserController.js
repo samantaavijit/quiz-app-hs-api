@@ -1,5 +1,5 @@
 const UsersModel = require("../../AuthModule/models/UsersModel");
-const TotalQuestionModel = require("../../QuestionModule/models/TotalQuestionModel");
+const ChapterModel = require("../../QuestionModule/models/ChapterModel");
 const { response, commonMessage } = require("../../common/responseHelper");
 
 let responseData;
@@ -7,30 +7,27 @@ let responseData;
 const getDashboardData = async (req, res) => {
   try {
     const total_users = await UsersModel.countDocuments({});
+    const new_users = await UsersModel.countDocuments({ active: false });
 
     let question_pipeline = [
       {
         $lookup: {
-          from: "chapters",
+          from: "questions",
           localField: "c_id",
           foreignField: "c_id",
-          as: "chapters",
-          pipeline: [
-            { $project: { name: 1 } }, // Exclude the password field and fmc_token
-          ],
+          as: "total",
+          pipeline: [{ $project: { answer: 1 } }],
         },
       },
       {
         $addFields: {
           // GET ONLY SINGLE VALUE
-          chapters: { $arrayElemAt: ["$chapters", 0] },
+          total: { $size: "$total" },
         },
       },
     ];
 
-    const total_question = await TotalQuestionModel.aggregate(
-      question_pipeline
-    );
+    const total_question = await ChapterModel.aggregate(question_pipeline);
 
     responseData = {
       success: true,
@@ -38,6 +35,7 @@ const getDashboardData = async (req, res) => {
       dashboard: {
         total_users,
         total_question,
+        new_users,
       },
     };
     return response({
@@ -67,7 +65,7 @@ const getAllUsers = async (req, res) => {
 
     responseData = {
       success: true,
-      message: "New Chapter Added",
+      message: "All Users",
       users,
     };
     return response({

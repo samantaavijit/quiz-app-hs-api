@@ -1,11 +1,7 @@
 const { validationResult } = require("express-validator");
 const { commonMessage, response } = require("../../common/responseHelper");
 const ChapterModel = require("../models/ChapterModel");
-const { file_size } = require("../../common/fileHelper");
-const path = require("path");
-const moment = require("moment");
 const { firebaseDatabase } = require("../../common/firebaseHelper");
-const TotalQuestionModel = require("../models/TotalQuestionModel");
 const QuestionModel = require("../models/QuestionModel");
 
 let responseData;
@@ -219,7 +215,7 @@ const generateRandomQuestion = async (req, res) => {
 
       const snapshot = await query.once("value");
 
-      let totalItems = await TotalQuestionModel.findOne({ c_id: topic_id });
+      // let totalItems = await TotalQuestionModel.findOne({ c_id: topic_id });
 
       totalItems = totalItems ? totalItems.total : 0;
 
