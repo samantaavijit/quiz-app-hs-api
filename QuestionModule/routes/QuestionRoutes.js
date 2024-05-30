@@ -4,6 +4,7 @@ const {
   addQuestion,
   getTopicWiseQuestions,
   generateRandomQuestion,
+  addMockTest,
 } = require("../controllers/QuestionController");
 const {
   addChapterValidation,
@@ -16,6 +17,7 @@ const Router = require("express").Router();
 // FOR ADMIN ONLY
 Router.post("/add-chapter", [isAdmin, addChapterValidation], addChapter);
 Router.post("/add-question", [isAdmin, addQuestionValidation], addQuestion);
+Router.post("/add-mock-test", [isAdmin], addMockTest);
 
 // FOR USERS ONLY
 
