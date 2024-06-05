@@ -21,7 +21,7 @@ const MockTestSchema = new mongoose.Schema({
     type: Array,
     required: true,
   },
-  status: {
+  active: {
     type: Boolean,
     default: true,
   },

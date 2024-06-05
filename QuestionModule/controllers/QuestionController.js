@@ -348,11 +348,51 @@ const generateRandomQuestion = async (req, res) => {
   }
 };
 
+const getAllMockTest = async (req, res) => {
+  try {
+    const { userDetails } = req;
+    const user_id = userDetails._id;
+
+    const pipeline = [
+      {
+        $match: { active: true },
+      },
+    ];
+
+    const mock_test = await MockTestModel.aggregate(pipeline);
+
+    responseData = {
+      success: true,
+      message: "All Mock Test",
+      mock_test,
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   addChapter,
   getAllChapters,
   addQuestion,
   getTopicWiseQuestions,
   addMockTest,
+  getAllMockTest,
   generateRandomQuestion,
 };
