@@ -4,6 +4,8 @@ const ChapterModel = require("../models/ChapterModel");
 const { firebaseDatabase } = require("../../common/firebaseHelper");
 const QuestionModel = require("../models/QuestionModel");
 const MockTestModel = require("../models/MockTestModel");
+const CompleteTestModel = require("../models/CompleteTestModel");
+const { default: mongoose } = require("mongoose");
 
 let responseData;
 
@@ -222,12 +224,12 @@ const addMockTest = async (req, res) => {
 
       const pipeline = [
         { $match: { c_id } }, // Apply the condition
-        { $sample: { size: 2 } }, // Fetch 20 random records
+        { $sample: { size: Number(marks) } }, // Fetch 20 random records
         { $project: { _id: 1 } }, // Only include the _id field
       ];
 
       questions = await QuestionModel.aggregate(pipeline);
-      questions = questions.map((doc) => doc._id.toString());
+      questions = questions.map((doc) => doc._id);
     }
 
     const data = {
@@ -387,6 +389,60 @@ const getAllMockTest = async (req, res) => {
   }
 };
 
+const startMockTest = async (req, res) => {
+  try {
+    const { userDetails } = req;
+    const user_id = userDetails._id;
+    const { test_id } = req.params;
+
+    const isPresent = await CompleteTestModel.findOne({ user_id, test_id });
+
+    if (!isPresent) {
+      await CompleteTestModel.create({ user_id, test_id });
+    }
+
+    const pipeline = [
+      {
+        $match: { _id: new mongoose.Types.ObjectId(test_id) },
+      },
+      {
+        $lookup: {
+          from: "questions", // The collection to join
+          localField: "questions", // Field from the input documents
+          foreignField: "_id", // Field from the documents of the "from" collection
+          as: "questions", // Output array field
+        },
+      },
+    ];
+
+    const mock_test = await MockTestModel.aggregate(pipeline);
+
+    responseData = {
+      success: true,
+      message: "Mock Test Details",
+      mock_test,
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   addChapter,
   getAllChapters,
@@ -395,4 +451,5 @@ module.exports = {
   addMockTest,
   getAllMockTest,
   generateRandomQuestion,
+  startMockTest,
 };

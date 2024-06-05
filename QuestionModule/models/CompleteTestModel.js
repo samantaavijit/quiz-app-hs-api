@@ -13,8 +13,9 @@ const CompleteTestSchema = new mongoose.Schema({
   },
   status: {
     type: Number,
-    default: TEST_STATUS.PENDING,
+    default: TEST_STATUS.INPROGRESS,
   },
+  score: Number,
 });
 
 module.exports = mongoose.model("complete_tests", CompleteTestSchema);
