@@ -66,6 +66,40 @@ const addWalletBalance = async (req, res) => {
   }
 };
 
+const getAllTransaction = async (req, res) => {
+  try {
+    const { userDetails } = req;
+    const user_id = userDetails._id;
+
+    const transaction = await WalletTransactionModel.find({ user_id });
+
+    responseData = {
+      success: true,
+      message: "All Transactions",
+      transaction,
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   addWalletBalance,
+  getAllTransaction,
 };
