@@ -15,9 +15,9 @@ const UsersSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    mobile: {
-      type: String,
-      default: null,
+    balance: {
+      type: Number,
+      default: 0,
     },
     active: {
       type: Boolean,
