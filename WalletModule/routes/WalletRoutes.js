@@ -2,11 +2,15 @@ const { isAdmin, isAuthenticate, isValidUser } = require("../../common/Helper");
 const {
   addWalletBalance,
   getAllTransaction,
+  getAllTransactionForAdmin,
+  approveTransaction,
 } = require("../controllers/WalletController");
 
 const Router = require("express").Router();
 
 // FOR ADMIN ONLY
+Router.get("/all-transaction-for-admin", [isAdmin], getAllTransactionForAdmin);
+Router.post("/approve-transaction", [isAdmin], approveTransaction);
 
 // FOR USERS ONLY
 Router.post("/add-balance", [isValidUser], addWalletBalance);
