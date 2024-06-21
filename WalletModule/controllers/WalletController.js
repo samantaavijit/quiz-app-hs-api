@@ -188,9 +188,56 @@ const approveTransaction = async (req, res) => {
   }
 };
 
+const deleteTransaction = async (req, res) => {
+  try {
+    const { transaction_id } = req.params;
+
+    const result = await WalletTransactionModel.findByIdAndDelete(
+      transaction_id
+    );
+
+    if (result) {
+      responseData = {
+        success: true,
+        message: "Transaction deleted",
+      };
+      return response({
+        statusCode: 200,
+        status: "success",
+        response: responseData,
+        res,
+      });
+    }
+
+    responseData = {
+      success: false,
+      message: "Transaction delete failed",
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   addWalletBalance,
   getAllTransaction,
   getAllTransactionForAdmin,
   approveTransaction,
+  deleteTransaction,
 };

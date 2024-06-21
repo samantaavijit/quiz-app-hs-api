@@ -4,6 +4,7 @@ const {
   getAllTransaction,
   getAllTransactionForAdmin,
   approveTransaction,
+  deleteTransaction,
 } = require("../controllers/WalletController");
 
 const Router = require("express").Router();
@@ -11,6 +12,7 @@ const Router = require("express").Router();
 // FOR ADMIN ONLY
 Router.get("/all-transaction-for-admin", [isAdmin], getAllTransactionForAdmin);
 Router.post("/approve-transaction", [isAdmin], approveTransaction);
+Router.delete("/transaction/:transaction_id", [isAdmin], deleteTransaction);
 
 // FOR USERS ONLY
 Router.post("/add-balance", [isValidUser], addWalletBalance);
