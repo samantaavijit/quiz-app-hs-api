@@ -234,10 +234,57 @@ const deleteTransaction = async (req, res) => {
   }
 };
 
+const getWalletBalance = async (req, res) => {
+  try {
+    const { userDetails } = req;
+    const user_id = userDetails._id;
+
+    let balance = await UsersModel.findById(user_id, { balance: 1 });
+
+    if (balance) {
+      balance = balance.balance;
+      responseData = {
+        success: true,
+        message: "Balance Fetch Successfully",
+        balance,
+      };
+      return response({
+        statusCode: 200,
+        status: "success",
+        response: responseData,
+        res,
+      });
+    }
+    responseData = {
+      success: false,
+      message: "Balance Fetch Failed",
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   addWalletBalance,
   getAllTransaction,
   getAllTransactionForAdmin,
   approveTransaction,
   deleteTransaction,
+  getWalletBalance,
 };

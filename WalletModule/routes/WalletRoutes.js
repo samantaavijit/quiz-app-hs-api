@@ -5,6 +5,7 @@ const {
   getAllTransactionForAdmin,
   approveTransaction,
   deleteTransaction,
+  getWalletBalance,
 } = require("../controllers/WalletController");
 
 const Router = require("express").Router();
@@ -17,5 +18,6 @@ Router.delete("/transaction/:transaction_id", [isAdmin], deleteTransaction);
 // FOR USERS ONLY
 Router.post("/add-balance", [isValidUser], addWalletBalance);
 Router.get("/all-transactions", [isValidUser], getAllTransaction);
+Router.get("/balance", [isValidUser], getWalletBalance);
 
 module.exports = Router;
