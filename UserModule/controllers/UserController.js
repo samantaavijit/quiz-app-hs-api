@@ -136,8 +136,54 @@ const toggleUserStatus = async (req, res) => {
   }
 };
 
+const updateUserDetails = async (req, res) => {
+  try {
+    const { id, name } = req.body;
+
+    const updateResult = await UsersModel.findByIdAndUpdate(id, { name });
+
+    if (updateResult) {
+      responseData = {
+        success: true,
+        message: "User update successfully",
+      };
+      return response({
+        statusCode: 200,
+        status: "success",
+        response: responseData,
+        res,
+      });
+    }
+
+    responseData = {
+      success: false,
+      message: "User update failed",
+    };
+
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   getDashboardData,
   getAllUsers,
   toggleUserStatus,
+  updateUserDetails,
 };
