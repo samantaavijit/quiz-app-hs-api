@@ -1,9 +1,11 @@
 const jwt = require("jsonwebtoken");
-const { commonMessage } = require("./responseHelper");
+const { commonMessage, response } = require("./responseHelper");
 const secretKey = "chat-app-lBox@2023";
 const UsersModel = require("../AuthModule/models/UsersModel");
 const AdminModel = require("../AuthModule/models/AdminModel");
 const { loginMessage } = require("../AuthModule/controllers/AuthResponse");
+
+let responseData;
 
 const createToken = (user, expirationTime = 1) => {
   expirationTime = expirationTime * 24 * 60 * 60;
