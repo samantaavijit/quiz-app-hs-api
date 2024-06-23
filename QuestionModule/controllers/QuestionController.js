@@ -1,7 +1,7 @@
 const { validationResult } = require("express-validator");
 const { commonMessage, response } = require("../../common/responseHelper");
 const ChapterModel = require("../models/ChapterModel");
-const { firebaseDatabase } = require("../../common/firebaseHelper");
+// const { firebaseDatabase } = require("../../common/firebaseHelper");
 const QuestionModel = require("../models/QuestionModel");
 const MockTestModel = require("../models/MockTestModel");
 const CompleteTestModel = require("../models/CompleteTestModel");
@@ -298,7 +298,7 @@ const generateRandomQuestion = async (req, res) => {
     let randomData = [];
 
     if (topic_id !== "all_chapters") {
-      let query = firebaseDatabase.ref(topic_id);
+      // let query = firebaseDatabase.ref(topic_id);
 
       const snapshot = await query.once("value");
 
