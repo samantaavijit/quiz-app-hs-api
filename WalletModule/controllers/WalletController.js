@@ -72,7 +72,9 @@ const getAllTransaction = async (req, res) => {
     const { userDetails } = req;
     const user_id = userDetails._id;
 
-    const transaction = await WalletTransactionModel.find({ user_id });
+    const transaction = await WalletTransactionModel.find({ user_id }).sort({
+      date: -1,
+    });
 
     responseData = {
       success: true,
@@ -110,7 +112,10 @@ const getAllTransactionForAdmin = async (req, res) => {
     const transaction = await WalletTransactionModel.find({})
       .populate("user_id")
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .sort({
+        date: -1,
+      });
 
     responseData = {
       success: true,
