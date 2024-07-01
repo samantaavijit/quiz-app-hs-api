@@ -415,7 +415,8 @@ const startMockTest = async (req, res) => {
       },
     ];
 
-    const mock_test = await MockTestModel.aggregate(pipeline);
+    let mock_test = await MockTestModel.aggregate(pipeline);
+    mock_test = mock_test.length > 0 ? mock_test[0].questions : [];
 
     responseData = {
       success: true,
