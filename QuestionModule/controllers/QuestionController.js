@@ -359,6 +359,38 @@ const getAllMockTest = async (req, res) => {
       {
         $match: { active: true },
       },
+
+      {
+        $lookup: {
+          from: "complete_tests",
+          let: { id: "$_id" }, // Define local variable for local field
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$test_id", "$$id"] },
+                    { $eq: ["$user_id", user_id] },
+                  ],
+                },
+              },
+            },
+            {
+              $project: { status: 1 },
+            },
+          ],
+          as: "completeStatus",
+        },
+      },
+      {
+        $addFields: {
+          // GET ONLY SINGLE VALUE
+          completeStatus: { $arrayElemAt: ["$completeStatus", 0] },
+        },
+      },
+      {
+        $project: { questions: 0 },
+      },
     ];
 
     const mock_test = await MockTestModel.aggregate(pipeline);
