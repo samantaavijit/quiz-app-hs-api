@@ -6,6 +6,7 @@ const QuestionModel = require("../models/QuestionModel");
 const MockTestModel = require("../models/MockTestModel");
 const CompleteTestModel = require("../models/CompleteTestModel");
 const { default: mongoose } = require("mongoose");
+const { TEST_STATUS } = require("../../common/VariableHelper");
 
 let responseData;
 
@@ -429,7 +430,21 @@ const startMockTest = async (req, res) => {
 
     const isPresent = await CompleteTestModel.findOne({ user_id, test_id });
 
-    if (!isPresent) {
+    if (isPresent) {
+      if (isPresent.status === TEST_STATUS.COMPLETED) {
+        responseData = {
+          success: false,
+          message: "Invalid Link",
+          gotoNext: true,
+        };
+        return response({
+          statusCode: 200,
+          status: "failed",
+          response: responseData,
+          res,
+        });
+      }
+    } else {
       await CompleteTestModel.create({ user_id, test_id });
     }
 
@@ -476,6 +491,57 @@ const startMockTest = async (req, res) => {
   }
 };
 
+const completeMockTest = async (req, res) => {
+  try {
+    const { userDetails } = req;
+    const user_id = userDetails._id;
+    const { test_id, score } = req.body;
+
+    const result = await CompleteTestModel.findOneAndUpdate(
+      {
+        user_id,
+        test_id,
+      },
+      { status: TEST_STATUS.COMPLETED, score }
+    );
+
+    if (result) {
+      responseData = {
+        success: true,
+        message: "Update Successfully",
+      };
+      return response({
+        statusCode: 200,
+        status: "success",
+        response: responseData,
+        res,
+      });
+    }
+    responseData = {
+      success: false,
+      message: "Update failed",
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   addChapter,
   getAllChapters,
@@ -485,4 +551,5 @@ module.exports = {
   getAllMockTest,
   generateRandomQuestion,
   startMockTest,
+  completeMockTest,
 };

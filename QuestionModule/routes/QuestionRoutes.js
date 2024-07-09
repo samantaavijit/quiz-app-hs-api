@@ -7,6 +7,7 @@ const {
   addMockTest,
   getAllMockTest,
   startMockTest,
+  completeMockTest,
 } = require("../controllers/QuestionController");
 const {
   addChapterValidation,
@@ -32,5 +33,6 @@ Router.get(
 Router.get("/get-quiz-question", [isAuthenticate], generateRandomQuestion);
 Router.get("/get-mock-test", [isAuthenticate], getAllMockTest);
 Router.get("/get-mock-test/:test_id", [isAuthenticate], startMockTest);
+Router.put("/update-mock-test", [isAuthenticate], completeMockTest);
 
 module.exports = Router;
