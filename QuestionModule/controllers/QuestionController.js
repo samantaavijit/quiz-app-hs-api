@@ -542,6 +542,57 @@ const completeMockTest = async (req, res) => {
   }
 };
 
+const getAllMockTestForAdmin = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $lookup: {
+          from: "complete_tests",
+          localField: "_id",
+          foreignField: "test_id",
+          as: "studentAttempts",
+        },
+      },
+      {
+        $addFields: {
+          // GET ONLY SINGLE VALUE
+          studentAttempts: { $size: "$studentAttempts" },
+        },
+      },
+
+      {
+        $project: { questions: 0 },
+      },
+    ];
+
+    const mock_test = await MockTestModel.aggregate(pipeline);
+
+    responseData = {
+      success: true,
+      message: "All Mock Test",
+      mock_test,
+    };
+    return response({
+      statusCode: 200,
+      status: "success",
+      response: responseData,
+      res,
+    });
+  } catch (err) {
+    let responseData = {
+      success: false,
+      message: commonMessage.API_ERROR,
+      err: err.stack,
+    };
+    return response({
+      statusCode: 200,
+      status: "failed",
+      response: responseData,
+      res,
+    });
+  }
+};
+
 module.exports = {
   addChapter,
   getAllChapters,
@@ -552,4 +603,5 @@ module.exports = {
   generateRandomQuestion,
   startMockTest,
   completeMockTest,
+  getAllMockTestForAdmin,
 };

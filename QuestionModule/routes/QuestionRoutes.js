@@ -8,6 +8,7 @@ const {
   getAllMockTest,
   startMockTest,
   completeMockTest,
+  getAllMockTestForAdmin,
 } = require("../controllers/QuestionController");
 const {
   addChapterValidation,
@@ -21,6 +22,7 @@ const Router = require("express").Router();
 Router.post("/add-chapter", [isAdmin, addChapterValidation], addChapter);
 Router.post("/add-question", [isAdmin, addQuestionValidation], addQuestion);
 Router.post("/add-mock-test", [isAdmin], addMockTest);
+Router.get("/get-mock-test-for-admin", [isAdmin], getAllMockTestForAdmin);
 
 // FOR USERS ONLY
 
